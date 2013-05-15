@@ -1,0 +1,314 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="style.css" rel="stylesheet" type="text/css" />
+<script>
+
+function maketype(x) {
+	if (x== "NFA") {
+		document.getElementById('simbolo1').value = "€";
+	} else {
+		document.getElementById('simbolo1').value = "";
+	}
+	
+}
+
+function makealfabetinputes(x) {
+	symbolsholder = "";
+	for (i = 1; i<=x; i++) {
+		value = "";
+		if (document.getElementById('simbolo'+i) != null) {
+			value = document.getElementById('simbolo'+i).value 
+		}
+		symbolsholder += '<label for="">Simbolo '+i+'</label> <input type="text" value="'+value+'" name="simbolo'+i+'" id="simbolo'+i+'" onChange="getandsetstatesinputes()"  /> <br />';
+	}
+	document.getElementById('symbolsholder').innerHTML = symbolsholder;
+	
+}
+
+
+function makestatesinputes(x) {
+	estadosholder = "";
+	for (i = 1; i<=x; i++) {
+		value = "";
+		if (document.getElementById('estado'+i) != null) {
+			value = document.getElementById('estado'+i).value 
+		}
+		estadosholder += '<label for="">Estado '+i+'</label> <input type="text" value="'+value+'" name="estado'+i+'" id="estado'+i+'" onChange="getandsetstatesinputes()"  /> <br />';
+	}
+	document.getElementById('estadosholder').innerHTML = estadosholder;
+	
+}
+
+
+
+function makestransitionsinputes(x) {
+	transitionsholder = "";
+	for (i = 1; i<=x; i++) {
+		
+		transitionsholder += '<label for="">Transición '+i+': </label>'; 
+		transitionsholder += '<select name="transicionfrom'+i+'" id="transicionfrom'+i+'">';
+		
+		lenght = document.getElementById('cantidadestados').value;
+		for (j = 1; j<=lenght; j++) {
+			estado = document.getElementById('estado'+j).value;
+			transitionsholder += '<option value="'+estado+'">'+estado+'</option>';
+		}
+				
+		transitionsholder += '</select>';
+		
+		transitionsholder += '->';
+		
+		transitionsholder += '<select name="transicionto'+i+'" id="transicionto'+i+'" >';
+		
+		lenght = document.getElementById('cantidadestados').value;
+		for (j = 1; j<=lenght; j++) {
+			estado = document.getElementById('estado'+j).value;
+			transitionsholder += '<option value="'+estado+'">'+estado+'</option>';
+		}
+		
+		
+		
+				
+		transitionsholder += '</select> ';
+		
+		
+		
+		transitionsholder += '<label for="">Con Símbolo: </label>'; 
+		transitionsholder += '<select name="withsymbol'+i+'" id="withsymbol'+i+'" >';
+		
+		lenght = document.getElementById('cantidadestados').value;
+		for (j = 1; j<=lenght; j++) {
+			estado = document.getElementById('simbolo'+j).value;
+			transitionsholder += '<option value="'+estado+'">'+estado+'</option>';
+		}
+				
+		transitionsholder += '</select><br />';
+		
+	}
+	
+	
+	document.getElementById('transitionsholder').innerHTML = transitionsholder;	
+}
+
+function makesfinaltatesinputes(x) {
+	estadosholder = "";
+	for (i = 1; i<=x; i++) {
+		
+		estadosholder += '<select name="estadofinal'+i+'">';
+		
+		lenght = document.getElementById('cantidadestados').value;
+		for (j = 1; j<=lenght; j++) {
+			estado = document.getElementById('estado'+j).value;
+			estadosholder += '<option value="'+estado+'">'+estado+'</option>';
+		}
+		
+		estadosholder += '</select> <br />';
+	}
+	
+	
+	
+	document.getElementById('finalstatesholder').innerHTML = estadosholder;	
+}
+
+
+ 
+
+
+function getandsetstatesinputes() {
+	
+	estadoinicialholder = '<select name="estadoinicial">';
+	x = document.getElementById('cantidadestados').value;
+	for (i = 1; i<=x; i++) {
+		estado = document.getElementById('estado'+i).value;
+		estadoinicialholder += '<option value="'+estado+'">'+estado+'</option>';
+	}
+	
+	estadoinicialholder += '</select>';
+	
+	
+ 	document.getElementById('estadoinicialholder').innerHTML = estadoinicialholder;
+	
+	makesfinaltatesinputes(1);
+}
+
+function generate() {
+		
+
+	json = "{";
+	json += "<br />";
+	
+	
+	json += '"tipo" : "' + document.getElementById('tipo').value + '" , ';
+	json += "<br />";
+	
+	
+	json += '"estados" : [ ';
+	json += "<br />";
+	
+	
+	
+	x = document.getElementById('cantidadestados').value;
+	for (i = 1; i<=x; i++) {
+		
+		
+		estado = document.getElementById('estado'+i).value;
+		
+		json += '{  "estado" : "'+estado+'" ,';
+		json += "<br />";
+		
+		
+		json += '"transiciones" : [  <br /> { ';
+		for (j = 1; j<=document.getElementById('cantidadtransiciones').value; j++) {
+			if ( document.getElementById('transicionfrom'+j).value == estado) {
+				transicion = document.getElementById('transicionto'+j).value;
+				withs = document.getElementById('withsymbol'+j).value;
+				json += '"'+withs+'" : "' + transicion + '"  , <br /> ';
+			}
+		}
+		json += '} ] , <br />';
+		
+		 
+		
+		json += '} , <br />';
+	}
+	
+	
+	
+		
+	
+	json += "]";
+	json += "<br />";
+	json += "}";
+	
+	document.getElementById('json').innerHTML = json;	
+}
+
+</script>
+</head>
+<title>Documento sin título</title>
+</head>
+
+<body>
+<div id="content">
+<h1>Input</h1>
+
+<form>
+  <h2>Tipo</h2>
+  <select name="tipo" id="tipo" onChange="maketype(this.value)">
+  	<option value="DFA">DFA</option>
+    <option value="NFA">NFA</option>
+  </select>
+  
+  
+  <hr />
+  
+  
+  <h2>Estados</h2>
+  <label for="">Cantidad</label> <input type="number" min="1" onChange="makestatesinputes(this.value)" value="1" name="cantidadestados" id="cantidadestados" />
+  <div id="estadosholder" class="sections">
+  	<label for="">Elemento 1</label> <input type="text" value="" name="elemento1" id="elemento1" onChange="getandsetstatesinputes()" /> <br />
+  </div>
+  
+  
+  <hr />
+  
+  
+  <h2>Alfabeto</h2>
+  <label for="">Cantidad</label> <input type="number" min="1" onChange="makealfabetinputes(this.value)" value="1" name="cantidadelementosalfabeto" id="cantidadelementosalfabeto" />
+  <div id="symbolsholder" class="sections">
+  	<label for="">Simbolo 1</label> <input type="text" value="" name="simbolo1" id="simbolo1" onChange="makealfabetinputes()" /> <br />
+  </div>
+  
+  
+  
+   <hr />
+  
+  
+  
+  <h2>Transiciones</h2>
+  <label for="">Cantidad</label> <input type="number" min="1" onChange="makestransitionsinputes(this.value)" value="1" name="cantidadtransiciones" id="cantidadtransiciones" />
+  <div id="transitionsholder" class="sections">
+   	<label for="">Transición 1: </label> 
+  	<select name="transicionfrom1" id="transicionfrom1">
+  		<option value=""></option>
+  	</select>
+    
+    ->
+    
+    <select name="transicionto1"  id="transicionto1">
+  		<option value=""></option>
+  	</select>
+    
+    <label for="">Con Símbolo: </label> 
+    <select name="withsymbol1"  id="withsymbol1">
+  		<option value=""></option>
+  	</select>
+     <br />
+  </div>
+  
+  
+  
+  <hr />
+  
+  
+  
+  
+  <h2>Estado Inicial</h2>
+  <div id="estadoinicialholder">
+    <select name="estadoinicial">
+      <option value=""></option>
+    </select>
+  </div>
+  
+  
+  
+  <hr />
+  
+  
+  
+  
+  <h2>Estado Finales</h2>
+  <label for="">Cantidad</label> <input type="number" min="1" onChange="makesfinaltatesinputes(this.value)" value="1" name="cantidadestadosfinales" id="cantidadestadosfinales" />
+  <div id="finalstatesholder" class="sections">
+  	<select name="estadofinal1">
+  		<option value=""></option>
+  	</select>
+  </div>
+  
+  <a href="javascript:generate()">Generate</a>
+  
+</form>
+
+<div class="container">
+<h1>Output</h1>
+<div id="json">
+
+{
+"tipo" : "NFA",
+"estados": [
+	{ "estado":"q1" ,
+	  "transiciones" : [
+      		{ "0":"q1" ,
+          	"1" : "q2" }
+      ] ,
+      "inicial":"TRUE",
+      "final":"FALSE" 
+	},
+    { "estado":"q2",
+	  "transiciones" : [
+      		{ "0":"q2" ,
+          	"1" : "q1" }
+      ] ,
+      "inicial":"FALSE" ,
+      "final":"TRUE" 
+	}
+]
+}
+</div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+@charset "UTF-8";
+/* CSS Document */
+
+body {
+	font-family:"Helvetica Neue";
+}
+
+#content {
+	width:950px;
+	border:#333 thin solid;
+	margin:auto;
+	padding:20px;
+}
+
+#content .container {
+	border:#333 thin solid;
+	padding:20px;
+	padding-top:10px;
+	margin-top:20px;
+		
+}
+
+.sections {
+	margin-top:20px;	
+}
+
+/*General*/
+
+.clear {
+	clear:both;	
+}
