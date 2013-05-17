@@ -27,6 +27,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	}else{
 		throw "Se requier por lo menos 1 simbolo en el alfabeto de entrada";
 	}
+	
 
 	if (transiciones && (transiciones.length === (estados.length * simbolos.length))){
 		for (var i = 0; i < transiciones.length; i++){
