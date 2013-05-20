@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Graficador De Automatas</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Bootstrap -->
+	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+</head>
+<body>
+	<h1>Graficador de automatas</h1>
+
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span3">
+				<!--Sidebar content-->
+				<h3>Automatas Existentes</h3>
+
+				<h5>DFA's</h5>
+
+				<ul id="ListaDeDFA" class="nav nav-tabs nav-stacked">
+				</ul>
+
+				<h5>NFA's</h5>
+
+				<ul id="ListaDeNFA" class="nav nav-tabs nav-stacked">
+				</ul>
+			</div>
+			
+			<div class="span4">
+				<!--Body content-->	
+				<div class="row">
+					<div class="span12">
+						<h3>Definicion del automata</h3>
+						<h5>Ingrese aqui la informacion necesarioa para crear un nuevo DFA/NFA</h5>
+
+						<textarea id="EntradaDeDefinicion" rows="7" wrap="off" spellcheck="false" style="width:100%;max-width:100%;"></textarea>
+
+						<div id="MensajeDeConstruccion">
+						</div>
+
+						<div class="btn-group">
+							<button class="btn" onclick="guardarAutomata();">Guardar</button>
+							<button class="btn" onclick="limpiarDefinicion();">Limpiar</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="span12">
+						<h3>Grafica</h3>
+
+						<canvas id="myCanvas" style="width:100%;height:300px;border:1px solid #000000;">
+						</canvas>
+
+						<form class="form-inline">
+							<input id="CadenaDeEntrada" type="text">
+							<button class="btn" type="button" onclick="computarCadena();">Computar Cadena</button>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="span5">
+				<h3>Ayuda</h3>
+				<ul>
+					<li>
+						La definicion de un automata consta de 7 partes:
+						
+						<ol>
+							<li>TIPO: DFA &oacute; NFA</li>
+							<li>NOMBRE: Identificador unico del automata</li>
+							<li>ESTADOS: CSV de todos los estados del automata</li>
+							<li>ALFABETO: CSV de todos los simbolos de entrada</li>
+							<li>
+								TRANSICIONES: CSV de las transiciones del automata. El formato depende del tipo:
+								
+								<ul>
+									<li>Para un DFA: (q1,a,q2),(q1,b,q2),...etc</li>
+									<li>Para un NFA: (q1,a,(q2,q3)),(q1,a,(q1,q3)),...etc</li>
+								</ul>
+							</li>
+							<li>ESTADO INICIAL: El estado inicial del automata</li>
+							<li>ESTADOS FINALES: CSV de todos los estados finales del automata</li>
+						</ol>
+					</li>
+					<li>El nombre del automata solo puede contener caracteres alfanumericos, espacios, comas y los siguientes caracters: +,*,(,)</li>
+					<li>Los nombres de los estados solo pueden contener caracteres alfanumericos y guiones bajos</li>
+					<li>Los simbolos de entrada solo pueden contener caracteres alfanumericos</li>
+					<li>El caracter "#" representa epsilon</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<script src="jquery/jquery-1.9.1.min.js"></script>
+	<script src="bootstrap/js/bootstrap.min.js"></script>
+	<script src="js/clases.js"></script>
+	<script src="js/handlers.js"></script>
+	<script src="js/helpers.js"></script>
+</body>
+</html>

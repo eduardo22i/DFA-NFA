@@ -1,4 +1,5 @@
 function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFinales){
+	this.tipo = "DFA";
 	this.nombre = nombre;
 	this.estados = {};
 	this.alfabeto = {};
@@ -58,7 +59,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 			}
 		}
 	}else{
-		throw "Deben haber exactamente " + (estados.length * simbolos.length) + " transiciones. Solo hay " + transiciones.length;
+		throw "Deben haber exactamente " + (estados.length * simbolos.length) + " transiciones. Hay " + transiciones.length;
 	}
 
 	if (estadoInicial && estadoInicial.length > 0){
@@ -87,7 +88,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		//fucion que retorna una DFA que es la union de este dfa con el que viene de parametro
 		//Primero vamos a armar los 5 componentes distintos del dfa (conjunto de estados, alfabeto, transiciones, estado inicia y estados finales)
 		//el nombre es extra. no es parte de la definicion formal de un dfa.
-		var nombre = this.nombre + "_" + dfa.nombre;
+		var nombre = this.nombre + " *UNION* " + dfa.nombre;
 
 		var estados = [];
 		var alfabeto = [];
@@ -95,17 +96,12 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
 		var estadosFinales = [];
 
-
-
 		//Para obtener los estados de la maquina grande, los estados de las dos maquinas pequenas se deben combinar de todas las posibles maneras.
-		for (e1 in this.estados){ //para cada estado en esta maquina
-			
+		/*for (e1 in this.estados){ //para cada estado en esta maquina
 			for (e2 in dfa.estados){ //para cada estado en la maquina que se me envio
-				
-				estados.push(this.estados[e1].nombre + "_" + dfa.estados[e2].nombre); //metemos en el arreglo la combinacion de sus nombres, separados por un guion bajo
+				estados.push(this.estados[e1].nombre + "_" + dfa.estados[e2].nombre); 
 			}
-		}
-
+		}*/
 
 
 		//Estoy asumiendo que el alfabeto es el mismo para las dos maquinas pequenas. Si no lo es, levantar una exception
@@ -124,7 +120,27 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		}
 
 
+		for (e1 in this.estados){ //para cada estado en esta maquina
+			for (e2 in dfa.estados){ //para cada estado en la maquina que se me envio
+				estados.push(this.estados[e1].nombre + "_" + dfa.estados[e2].nombre);	//metemos en el arreglo la combinacion de sus nombres, separados por un guion bajo
+				
+				//Si e1 es parte del conjunto de estados finales del df1, OORRRR e2 es parte del conjunto de estados finales del dfa2, se convierte en un estado final de este nuevo dfa 
+				if (this.estadosFinales.hasOwnProperty(e1) || dfa.estadosFinales.hasOwnProperty(e2)){
+					estadosFinales.push(e1 + "_" + e2);
+				}
 
+				for (var j = 0; j < alfabeto.length; j++){
+					//transiciones es un arreglo de arreglos: cada elemento es un arreglo de 3 elementos, el primero es el estado actual, despues el simbolo de entrada, y por ultimo el estado destino
+					//entonces metemos esos tres valores de un solo al arreglo:
+					transiciones.push([e1 + "_" + e2, alfabeto[j], this.estados[e1].transiciones[alfabeto[j]].nombre + "_" + dfa.estados[e2].transiciones[alfabeto[j]].nombre]);
+					//Todo el argumento de push() va dentro de llaves cuadradas [], porque eso significa que es un arreglo.
+					//el objeto "transiciones" de cada estado es un "arreglo associativo", que cuando se le envia de parametro un simbolo (en este caso, el j-esimo simbolo del alfabeto), retorna un objeto
+					//que es el estado al que se deberia de ir la maquina. por eso esta el ".nombre", porque ocupamos el nombre de ese estado, y lo que se retorna es un objeto entero.
+				}		
+			}
+		}
+
+		/*
 		//Para las transiciones: Hay que recorrer todos los estados que llevamos hasta ahorita:
 		for (var i = 0; i < estados.length; i++){
 			//Agarramos el nombre de cada estado, hacemos split en el guion bajo (por eso lo hicimos ahyi arribita), y guardamos los pedazos en dos variables distintas.
@@ -141,7 +157,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 				//que es el estado al que se deberia de ir la maquina. por eso esta el ".nombre", porque ocupamos el nombre de ese estado, y lo que se retorna es un objeto entero.
 			}
 		}
-
+		*/
 
 
 		//El estado inicial de la maquina grande debe de ser el estado que resulto de la combinacion de los estados iniciales de las 2 maquinas pequenas
@@ -152,7 +168,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		//Los estados finales son todos los estados que tienen un estado final de CUALQUIERA de las dos maquinas pequenas.
 		//en la interseccion, solamente los estados que tengan un estado final de CADA maquina serian validos.
 		//Entonces, recorremos los estados que tenemos hasta ahorita:
-		for (var i = 0; i < estados.length; i++){
+		/*for (var i = 0; i < estados.length; i++){
 			//nuevamente separamos su nombre en dos partes, una para cada estado de cada dfa
 			var e1 = estados[i].split("_")[0];  //este estado pertenece a esta maquina (this)
 			var e2 = estados[i].split("_")[1];	//este estado pertenece a la maquina que vino de parametro(dfa)
@@ -161,7 +177,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 			if (this.estadosFinales.hasOwnProperty(e1) || dfa.estadosFinales.hasOwnProperty(e2)){
 				estadosFinales.push(estados[i]);
 			}
-		}
+		}*/
 
 		//una vez llenos los componentes del dfa, solo llamamos al constructor y retornamos el objeto resultante:
 		return new DFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
@@ -207,9 +223,47 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 
 		return resultado;
 	};
+
+	this.generarDefinicion = function(){
+		var definicion = "";
+
+		var tipo = "DFA";
+		var nombre = this.nombre;
+		var estados = [];
+		var simbolos = [];
+		var transiciones = [];
+		var estadoInicial = this.estadoInicial.nombre;
+		var estadosFinales = [];
+
+		for (e in this.estados){
+			estados.push(e);
+			for (t in this.estados[e].transiciones){
+				transiciones.push("(" + e + "," + t + "," + this.estados[e].transiciones[t].nombre + ")");
+			}
+		}
+
+		for (s in this.alfabeto){
+			simbolos.push(s);
+		}
+
+		for (e in this.estadosFinales){
+			estadosFinales.push(e);
+		}
+
+		var definicion = tipo + "\n";
+		definicion += nombre + "\n";
+		definicion += estados.join(",") + "\n";
+		definicion += simbolos.join(",") + "\n";
+		definicion += transiciones.join(",") + "\n";
+		definicion += estadoInicial + "\n";
+		definicion += estadosFinales.join(",");
+
+		return definicion;
+	};
 }
 
 function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFinales){
+	this.tipo = "NFA";
 	this.nombre = nombre;
 	this.estados = {};
 	this.alfabeto = {};
@@ -302,6 +356,38 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	}
 
 	this.union = function(nfa){
+		var nombre = this.nombre + "_" + nfa.nombre;
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
+
+		for (e1 in this.estados){
+			var nuevoEstado = new Estado(this.estados[e1].nombre + "-1", {});
+
+			for (t in e1.transiciones){
+
+			}
+		}
+
+		for (e2 in nfa.estados){
+			estados[nfa.estados[e2].nombre + "-2"] = new Estado(nfa.estados[e2].nombre + "-2", {});
+		}	
+
+		for (s1 in this.alfabeto){
+			if (!nfa.alfabeto.hasOwnProperty(s1)){
+				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
+			}
+		}
+
+		for (s2 in nfa.alfabeto){
+			if (!this.alfabeto.hasOwnProperty(s2)){
+				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
+			}
+			alfabeto.push(s2);
+		}
 	};
 
 	this.interseccion = function(nfa){
@@ -324,64 +410,29 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 				"transicionesTomadas" : []
 			};
 
-			//console.log(this);
-			//alert("antes de recursar");
 			recursar(cadena, this.estadoInicial, this.estadosFinales);
-
-			//console.log(resultado);
 			return resultado;
 		}else{
 			throw "La cadena de entrada debe ser un arreglo de simbolos de entrada";
 		}
 
 		function recursar(cadena, estadoActual, estadosFinales){
-			//console.log("entre a recursar");
-			//console.log(estadosFinales);
-			//alert("entre a recursar");
 			if (cadena.length === 0){
-				//for (e in estadosFinales){
-					//console.log(estadosFinales[e].nombre);
-				//}
-				//alert("cadena.length == 0\nestado actual = " + estadoActual.nombre);
 				if (estadosFinales.hasOwnProperty(estadoActual.nombre)){
-					//alert("return true")//acepto la cadena
 					return true;
 				}else{
-					//alert("return false");//llego al final de una rama del arbol y no acepto la cadena
 					return false;
 				}
 			}else{
 				var siguienteSimbolo = cadena.splice(0,1)[0];
-				//alert(siguienteSimbolo + "\n" + estadoActual.nombre);
-				
-				//for (e in estadoActual.transiciones[siguienteSimbolo]){
-					//alert(e);
-				//}
-				//console.log(estadoActual);
-				//alert("done");
 
 				for (e in estadoActual.transiciones[siguienteSimbolo]){
-					//alert("e de " + estadoActual.nombre + " con simbolo " + siguienteSimbolo + " = " + e);
-					//alert("posibilidad de mover de " + estadoActual.nombre + " con " + siguienteSimbolo + ": " + estadoActual.transiciones[siguienteSimbolo][e].nombre);
 					resultado.transicionesTomadas.push("De '" + estadoActual.nombre + "' con '" + siguienteSimbolo + "' -> '" + estadoActual.transiciones[siguienteSimbolo][e].nombre + "'");
-					//console.log("push");
-					//for(var i = 0; i < resultado.transicionesTomadas.length; i++){
-						//console.log(resultado.transicionesTomadas[i]);
-					//}
-					//console.log(resultado.transicionesTomadas);
 					if (recursar(cadena, estadoActual.transiciones[siguienteSimbolo][e], estadosFinales) === true){
 						resultado.acepta = true;
-						//console.log("aqui acepta");
-						//resultado.transicionesTomadas.forEach(function(){console.log(this);});
 						return true;
 					}else{
 						resultado.transicionesTomadas.pop();
-						//console.log("pop");
-						//for(var i = 0; i < resultado.transicionesTomadas.length; i++){
-							//console.log(resultado.transicionesTomadas[i]);
-						//}
-						//console.log(cadena);
-						//return false;
 					}
 				}
 
@@ -393,26 +444,12 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 				siguienteSimbolo = null;
 
 				for (e in estadoActual.transiciones[siguienteSimbolo]){
-					//alert("e de " + estadoActual.nombre + " con simbolo " + siguienteSimbolo + " = " + e);
-					//alert("posibilidad de mover de " + estadoActual.nombre + " con " + siguienteSimbolo + ": " + estadoActual.transiciones[siguienteSimbolo][e].nombre);
 					resultado.transicionesTomadas.push("De '" + estadoActual.nombre + "' con '" + siguienteSimbolo + "' -> '" + estadoActual.transiciones[siguienteSimbolo][e].nombre + "'");
-					//console.log("push");
-					//for(var i = 0; i < resultado.transicionesTomadas.length; i++){
-						//console.log(resultado.transicionesTomadas[i]);
-					//}
-					//console.log(resultado.transicionesTomadas);
 					if (recursar(cadena, estadoActual.transiciones[siguienteSimbolo][e], estadosFinales) === true){
 						resultado.acepta = true;
-						//console.log("aqui acepta");
-						//resultado.transicionesTomadas.forEach(function(){console.log(this);});
 						return true;
 					}else{
 						resultado.transicionesTomadas.pop();
-						//console.log("pop");
-						//for(var i = 0; i < resultado.transicionesTomadas.length; i++){
-							//console.log(resultado.transicionesTomadas[i]);
-						//}
-						//console.log(cadena);
 					}
 				}
 
@@ -421,6 +458,7 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		}
 	};
 }
+
 function Estado(nombre, transiciones){
 	this.nombre = nombre;
 	this.transiciones = transiciones;
