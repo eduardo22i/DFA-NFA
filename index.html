@@ -1,100 +1,120 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
-	<title>Graficador De Automatas</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<!-- Bootstrap -->
-	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <title>Graficador de Autómatas</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="Descripción del proyecto" />
+    <!-- bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+    <link href="css/style.css" rel="stylesheet" media="screen" />
 </head>
 <body>
-	<h1>Graficador de automatas</h1>
+    <div id="header">
+        <span id="help" title="Ayuda">?</span>
+        <h1>Graficador de Autómatas <sup>Beta</sup></h1>
+    </div>
+    <div class="container-fluid">
+        <div class="row-fluid">
 
-	<div class="container-fluid">
-		<div class="row-fluid">
-			<div class="span3">
-				<!--Sidebar content-->
-				<h3>Automatas Existentes</h3>
+            <div id="sidebar" class="span3">
+                <h3>Automatas Existentes</h3>
+                <h5>DFA's</h5>
+                <ul id="ListaDeDFA" class="nav nav-tabs nav-stacked">
+                </ul>
 
-				<h5>DFA's</h5>
+                <h5>NFA's</h5>
+                <ul id="ListaDeNFA" class="nav nav-tabs nav-stacked">
+                </ul>
+            </div>
 
-				<ul id="ListaDeDFA" class="nav nav-tabs nav-stacked">
-				</ul>
+            <div id="content" class="span8">
+                <div class="row">
+                    <div>
+                        <h3>Definicion del automata</h3>
+                        <h5>Ingrese aquí la información necesaria para crear un nuevo DFA / NFA</h5>
 
-				<h5>NFA's</h5>
+                        <textarea id="EntradaDeDefinicion" rows="8" spellcheck="false"></textarea>
 
-				<ul id="ListaDeNFA" class="nav nav-tabs nav-stacked">
-				</ul>
-			</div>
-			
-			<div class="span4">
-				<!--Body content-->	
-				<div class="row">
-					<div class="span12">
-						<h3>Definicion del automata</h3>
-						<h5>Ingrese aqui la informacion necesarioa para crear un nuevo DFA/NFA</h5>
+                        <div id="MensajeDeConstruccion">
+                        </div>
 
-						<textarea id="EntradaDeDefinicion" rows="7" wrap="off" spellcheck="false" style="width:100%;max-width:100%;"></textarea>
+                        <div class="btn-group">
+                            <button class="btn" onclick="guardarAutomata();">Guardar</button>
+                             <button class="btn" onclick="graficarAtomata();">Graficar</button>
+                            <button class="btn" onclick="limpiarDefinicion();">Limpiar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="span12">
+                        <h3>Gráfica</h3>
 
-						<div id="MensajeDeConstruccion">
-						</div>
+                        <div id="canvas"></div>
 
-						<div class="btn-group">
-							<button class="btn" onclick="guardarAutomata();">Guardar</button>
-							<button class="btn" onclick="limpiarDefinicion();">Limpiar</button>
-						</div>
-					</div>
-				</div>
+                        <form class="form-inline">
+                            <input id="CadenaDeEntrada" type="text">
+                            <button class="btn" type="button" onclick="computarCadena();">Computar Cadena</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-				<div class="row">
-					<div class="span12">
-						<h3>Grafica</h3>
+        <div id="help-window" class="modal hide fade">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>Ayuda</h3>
+            </div>
+            <div class="modal-body">
+                La definicion de un autómata consta de 7 partes:
+            <ul>
+                <li><b>Tipo:</b> DFA &oacute; NFA</li>
+                <li><b>Estados:</b> CSV de todos los estados del autómata.</li>
+                <li><b>Alfabeto:</b> CSV de todos los símbolos de entrada.</li>
+                <li>
+                    <b>Transiciones</b> CSV de las transiciones del autómata.
+                    <br />
+                    El formato depende del tipo:
+                    <ul>
+                        <li>Para un DFA: (q1,a,q2),(q1,b,q2), ... etc</li>
+                        <li>Para un NFA: (q1,a,(q2,q3)),(q1,a,(q1,q3)), ... etc</li>
+                    </ul>
+                </li>
+                <li><b>Estado inicial:</b> El estado inicial del autómata.</li>
+                <li><b>Estodos finales:</b> CSV de todos los estados finales del autómata.</li>
+            </ul>
+                <br />
+                <ul class="lista">
+                    <li>El nombre del automata solo puede contener caracteres alfanumericos, espacios, comas y los siguientes caracteres: +, *, (, )</li>
+                    <li>Los nombres de los estados solo pueden contener caracteres alfanumericos y guiones bajos.</li>
+                    <li>Los simbolos de entrada solo pueden contener caracteres alfanumericos.</li>
+                    <li>El caracter '#' representa epsilon.</li>
+                </ul>
+                <br />
+            </div>
+        </div>
+    </div>
 
-						<canvas id="myCanvas" style="width:100%;height:300px;border:1px solid #000000;">
-						</canvas>
+    <div id="footer">
 
-						<form class="form-inline">
-							<input id="CadenaDeEntrada" type="text">
-							<button class="btn" type="button" onclick="computarCadena();">Computar Cadena</button>
-						</form>
-					</div>
-				</div>
-			</div>
+    </div>
 
-			<div class="span5">
-				<h3>Ayuda</h3>
-				<ul>
-					<li>
-						La definicion de un automata consta de 7 partes:
-						
-						<ol>
-							<li>TIPO: DFA &oacute; NFA</li>
-							<li>NOMBRE: Identificador unico del automata</li>
-							<li>ESTADOS: CSV de todos los estados del automata</li>
-							<li>ALFABETO: CSV de todos los simbolos de entrada</li>
-							<li>
-								TRANSICIONES: CSV de las transiciones del automata. El formato depende del tipo:
-								
-								<ul>
-									<li>Para un DFA: (q1,a,q2),(q1,b,q2),...etc</li>
-									<li>Para un NFA: (q1,a,(q2,q3)),(q1,a,(q1,q3)),...etc</li>
-								</ul>
-							</li>
-							<li>ESTADO INICIAL: El estado inicial del automata</li>
-							<li>ESTADOS FINALES: CSV de todos los estados finales del automata</li>
-						</ol>
-					</li>
-					<li>El nombre del automata solo puede contener caracteres alfanumericos, espacios, comas y los siguientes caracters: +,*,(,)</li>
-					<li>Los nombres de los estados solo pueden contener caracteres alfanumericos y guiones bajos</li>
-					<li>Los simbolos de entrada solo pueden contener caracteres alfanumericos</li>
-					<li>El caracter "#" representa epsilon</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<script src="jquery/jquery-1.9.1.min.js"></script>
-	<script src="bootstrap/js/bootstrap.min.js"></script>
-	<script src="js/clases.js"></script>
-	<script src="js/handlers.js"></script>
-	<script src="js/helpers.js"></script>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/raphael-min.js"></script>
+    <script src="js/clases.js"></script>
+    <script src="js/handlers.js"></script>
+    <script src="js/helpers.js"></script>
+
+    <!-- Test scripts, se movera a un archivo .js -->
+    <script>
+        $(function () {
+            $("#help").click(function () {
+                $("#help-window").modal();
+            });
+        });
+    </script>
 </body>
 </html>
