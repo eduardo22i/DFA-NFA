@@ -356,7 +356,7 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	}
 
 	this.union = function(nfa){
-		var nombre = this.nombre + "_" + nfa.nombre;
+		var nombre = this.nombre + " *UNION* " + nfa.nombre;
 
 		var estados = [];
 		var alfabeto = [];
@@ -365,29 +365,72 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		var estadosFinales = [];
 
 		for (e1 in this.estados){
-			var nuevoEstado = new Estado(this.estados[e1].nombre + "-1", {});
+			estados.push(e1 + "-1");
+		}
+		alert(estados);
+		for (e2 in nfa.estados){
+			estados.push(e2 + "-2");
+		}
 
-			for (t in e1.transiciones){
+		alert(estados);
+		//agregar un nuevo estado inicial
+		estadoInicial = this.estadoInicial.nombre + "_" + nfa.estadoInicial.nombre;
+		estados.push(estadoInicial);
 
+		//copiar el alfabeto de cualquier automata
+		for (s in this.alfabeto){
+			alfabeto.push(s);
+		}
+
+		//transiciones se copian asi como estan.
+		for (e1 in this.estados){
+			for (t1 in this.estados[e1].transiciones){
+				var estadosDestino = new Array();
+
+				for (ef1 in this.estados[e1].transiciones[t1]){
+					estadosDestino.push(this.estados[e1].transiciones[t1][ef1].nombre + "-1");
+				}
+
+				transiciones.push([e1 + "-1", (t1 === "null" ? null:t1), estadosDestino]);
 			}
 		}
+
+		alert(transiciones);
 
 		for (e2 in nfa.estados){
-			estados[nfa.estados[e2].nombre + "-2"] = new Estado(nfa.estados[e2].nombre + "-2", {});
-		}	
+			for (t2 in nfa.estados[e2].transiciones){
+				var estadosDestino = new Array();
 
-		for (s1 in this.alfabeto){
-			if (!nfa.alfabeto.hasOwnProperty(s1)){
-				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
+				for (ef2 in nfa.estados[e2].transiciones[t2]){
+					estadosDestino.push(nfa.estados[e2].transiciones[t2][ef2].nombre + "-2");
+				}
+
+				transiciones.push([e2 + "-2", (t2 === "null" ? null:t2), estadosDestino]);
 			}
 		}
 
-		for (s2 in nfa.alfabeto){
-			if (!this.alfabeto.hasOwnProperty(s2)){
-				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
-			}
-			alfabeto.push(s2);
+		alert(transiciones);
+
+		//crear 2 transiciones epsilon, desde el nuevo estado inicial a los estados iniciales de cada automata individual
+		transiciones.push([estadoInicial, null, [this.estadoInicial.nombre + "-1", nfa.estadoInicial.nombre + "-2"]]);
+
+		//los estados finales son los mismos;
+		for (e1 in this.estadosFinales){
+			estadosFinales.push(e1 + "-1");
 		}
+
+		for (e2 in nfa.estadosFinales){
+			estadosFinales.push(e2 + "-2");
+		}
+
+		alert(estadoInicial);
+		alert(estadosFinales);
+
+		console.log(estados);
+		console.log(transiciones);
+		console.log(estadoInicial);
+		console.log(estadosFinales);
+		return new NFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
 	this.interseccion = function(nfa){
