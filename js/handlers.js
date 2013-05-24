@@ -16,7 +16,7 @@ $(document).ready(function () {
 		["q3", "b", "q3"]
     ];
     var estadoInicial1 = "q0";
-    var estadosFinales1 = ["q2"];
+    var estadosFinales1 = ["q3"];
 
     listaDeDFA[nombre1] = new DFA(nombre1, estados1, simbolos1, transiciones1, estadoInicial1, estadosFinales1);
 
@@ -70,7 +70,19 @@ $(document).ready(function () {
     actualizarMenuDeDFA();
     actualizarMenuDeNFA();
 
-    canvas = Raphael(document.getElementById("canvas"), 600, 400);
+    var widthCanvas = $("#canvas").width() < 500 ? 500 : $("#canvas").width(),
+        heightCanvas = $("#canvas").height() > 500 ? 500 : $("#canvas").height();
+
+    canvas = Raphael(document.getElementById("canvas"), widthCanvas, heightCanvas);
+
+    $(window).resize(function () {
+        canvas.clear();
+        widthCanvas = $("#canvas").width() < 500 ? 500 : $("#canvas").width();
+        heightCanvas = $("#canvas").height() > 500 ? 500 : $("#canvas").height();
+
+        canvas = Raphael(document.getElementById("canvas"), widthCanvas, heightCanvas);
+        graficarAtomata();
+    });
 });
 
 function guardarAutomata() {
@@ -104,129 +116,180 @@ function graficarAtomata() {
     var entrada = $('#EntradaDeDefinicion').val().trim();
     var automata = crearAutomata(entrada);
 
-    Graficar(automata.estados, automata.estadoInicial, automata.estadosFinales, automata.transiciones);
+    Graficar(automata);
 }
 
-
-function Graficar(estados, estadoInicial, estadosFinales, transiciones) {
+function Graficar(automata) {
 
     canvas.clear();
+    var titulo = automata.tipo + ": " + automata.nombre;
+
+    canvas.text(8, 15, titulo).attr({ "font-size": "18px", "font-family": "Consolas", "fill": "#000", "text-anchor": "start" });;
 
     var TAM_NODO = 20;
     var cantidadEstados = 0;
 
-    for (e in estados)
+    for (e in automata.estados)
         cantidadEstados++;
 
     var centro = {
             X: canvas.width / 2,
             Y: canvas.height / 2
         },
-        radio = canvas.width / 4;
+        radio = canvas.height / 2 - TAM_NODO * 3;
 
     var nodos = {};
     var incAngulo = 360 / cantidadEstados;
     var angulo = 180;
     var i = 0;
-    var colores = ["#B4009E", "#0090D5", "#442359", "#FF8C00", "#A5CE00"];
+    var colores = ["#B4009E", "#0090D5", "#FF8C00", "#A5CE00", "#F35C78"];
 
-    for (e in estados) {
-
+    for (e in automata.estados) {
         var anguloRad = angulo * Math.PI / 180;
 
         var x = centro.X + radio * Math.cos(anguloRad);
         var y = centro.Y + radio * Math.sin(anguloRad);
 
         var c = canvas.circle(x, y, TAM_NODO);
-        c.attr("fill", colores[i % 4]);
+        c.attr({ "fill": colores[i % colores.length], "stroke-width": "0" });
+        c.glow({ "width": 3, "opacity": 0.3, "offsety": 1 });
         i++;
 
-        var t = canvas.text(x, y, estados[e].nombre).attr({ "fill": "#fff", "font-size": "14px", "font-weight": "bold", "font-family": "consolas" });
+        var t = canvas.text(x, y, automata.estados[e].nombre).attr({ "fill": "#fff", "font-size": "14px", "font-weight": "bold", "font-family": "consolas" });
 
         var einicial = false;
-        if (estados[e].nombre == estadoInicial.nombre) {
+        if (automata.estados[e].nombre == automata.estadoInicial.nombre) {
             einicial = true;
             var ini = canvas.text(x - TAM_NODO - 16, y, "→");
-            ini.attr({ "font-size": "35px" });
+            ini.attr({ "font-size": "35px", "fill": "#444" });
         }
 
-
         var nodo = {
-            id: estados[e].nombre,
+            id: automata.estados[e].nombre,
             circulo: c,
             texto: t,
-            esInicial: einicial
+            esInicial: einicial,
+            txtTransicion: ""
         };
 
-        nodos[estados[e].nombre] = nodo;
+        nodos[automata.estados[e].nombre] = nodo;
         angulo += incAngulo;
     }
 
-    for (f in estadosFinales) {
-        nodos[f].circulo.attr({ "stroke-width": "3" });
+    for (f in automata.estadosFinales) {
+        nodos[f].circulo.attr({ "stroke-width": "6", "stroke": "#000", "stroke-opacity": 0.4 });
     }
 
-    //$.each(transiciones, function (i, v) {
-    //    var nodo1 = nodos[v[0]],
-    //        nodo2 = nodos[v[2]],
-    //        simbolo = v[1];
+    var transiciones = []
 
-    //    var x1 = nodo1.circulo.getBBox().x,
-    //        y1 = nodo1.circulo.getBBox().y,
-    //        x2 = nodo2.circulo.getBBox().x,
-    //        y2 = nodo2.circulo.getBBox().y;
+    for (e in automata.estados) {
+        for (a in automata.alfabeto) {
+            var transicion = [];
+            transicion.push(e);
+            transicion.push(a);
+            transicion.push(automata.estados[e].transicionar(a).nombre);
 
-    //    var iniX = 0, iniY = 0, finX = 0, finY = 0;
-    //    var arcIniX = 0, arcIniY = 0, arcFinX = 0, arcFinY = 0;
+            transiciones.push(transicion);
+        }  
+    }
 
-    //    if (x1 < x2) {
-    //        iniX = TAM_NODO * 1.5;
-    //        finX = TAM_NODO * 0.1;
-    //        arcIniX = 20;
-    //        arcFinX = -50;
-    //    }
-    //    else {
-    //        iniX = TAM_NODO * 0.5;
-    //        finX = TAM_NODO * 2;
-    //        arcIniX = 20;
-    //        arcFinX = 50;
-    //    }
+    $.each(transiciones, function (i, v) {
+        var nodo1 = nodos[v[0]],
+            nodo2 = nodos[v[2]],
+            simbolo = v[1];
 
-    //    if (y1 > y2) {
-    //        iniY = TAM_NODO * 0.1;
-    //        finY = TAM_NODO * 0.8;
-    //        arcIniY = -50;
-    //        arcFinY = 0;
-    //    }
-    //    else {
-    //        iniY = TAM_NODO * 1.9;
-    //        finY = TAM_NODO * 1.2;
-    //        arcIniY = 70;
-    //        arcFinY = 20;
-    //    }
+        var x1 = nodo1.circulo.getBBox().x + TAM_NODO,
+            y1 = nodo1.circulo.getBBox().y + TAM_NODO,
+            x2 = nodo2.circulo.getBBox().x + TAM_NODO,
+            y2 = nodo2.circulo.getBBox().y + TAM_NODO;
 
-    //    var coordenadas = "M" + (x1 + iniX) + ", " + (y1 + iniY) + " L" + (x2 + finX) + ", " + (y2 + finY);
+        if (nodo1 == nodo2) {
+            
+            var simbY = 0;
 
-    //    var linea = canvas.path(coordenadas);
+            if (y1 > centro.Y) {
+                y1 += TAM_NODO * 1.3;
+                simbY = TAM_NODO;
+            }
+            else {
+                y1 -= TAM_NODO * 1.3;
+                simbY = -TAM_NODO;
+            }
 
-    //    var flecha = canvas.text(x2 + finX, y2 + finY, "►");
-    //    flecha.attr("font-size", "16px");
+            canvas.circle(x1, y1, TAM_NODO);
 
+            if (nodo1.txtTransicion)
+                nodo1.txtTransicion += "," + simbolo;
+            else
+                nodo1.txtTransicion += simbolo;
 
-    //    var s = canvas.text((x1 + x2 + finX + finX) / 2, (y1 + y2 + finY + finY) / 2, simbolo);
-    //    s.attr({
-    //        "font-size": "14px",
-    //    });
+            var s = canvas.text(x1, y1 + simbY, nodo1.txtTransicion).attr({ "font-size": "14px", "font-family": "consolas" });
 
-    //    var box = s.getBBox();
-    //    var rect = canvas.rect(box.x - 5, box.y, box.width + 10, box.height).attr('fill', '#fff');
-    //    s.toFront();
+            var box = s.getBBox();
+            var rect = canvas.rect(box.x - 5, box.y, box.width + 10, box.height).attr('fill', '#fff');
+            s.toFront();
 
-    //});
+            var f = canvas.text(x1 + TAM_NODO - 1, y1, "►").attr({ "font-size": "14px"});
+
+            if (y1 < centro.Y) {
+                f.rotate(25, x1, y1).rotate(95);
+            }
+            else {
+                f.rotate(-25, x1, y1).rotate(-95);
+            }
+        }
+        else {
+            var distancia = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            var curvaX = 0, curvaY = 0, angFlecha = 0;
+
+            if (x2 > x1) {
+                if (y2 > y1) {
+                    curvaX = distancia * 0.6;
+                    curvaY = distancia * 0.1;
+                }
+                else {
+                    curvaX = distancia * 0.1;
+                    curvaY = -distancia * 0.6;
+                }
+            }
+            else {
+                if (y2 > y1) {
+                    curvaX = -distancia * 0.1;
+                    curvaY = distancia * 0.6; 
+                }
+                else {
+                    curvaX = -distancia * 0.6;
+                    curvaY = -distancia * 0.1;
+                }
+            }
+
+            var linea = canvas.path("M " + x1 + " " + y1 + " q " + " " + curvaX + " " + curvaY + " " + (x2 - x1) + " " + (y2 - y1));
+            var medioLinea = linea.getPointAtLength(linea.getTotalLength() / 2);
+
+            var txtSimbolo = canvas.text(medioLinea.x, medioLinea.y, simbolo).attr({ "font-size": "16px", "font-family": "consolas" });
+            var box = txtSimbolo.getBBox();
+            var rect = canvas.rect(box.x - 5, box.y, box.width + 10, box.height).attr('fill', '#fff');
+            txtSimbolo.toFront();
+
+            var posFlecha = linea.getPointAtLength(linea.getTotalLength() - TAM_NODO - 5);
+
+            var deltaX = x2 - posFlecha.x;
+            var deltaY = y2 - posFlecha.y;
+            angFlecha = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+
+            canvas.text(posFlecha.x, posFlecha.y, "►").attr({ "font-size": "14px" }).rotate(angFlecha);
+        }
+
+        nodo1.circulo.toFront();
+        nodo1.texto.toFront();
+        nodo2.circulo.toFront();
+        nodo2.texto.toFront();
+    });
 }
 
 function limpiarDefinicion() {
     $('#EntradaDeDefinicion').val("").focus();
+    canvas.clear();
     esconderMensajeDeConstruccion();
 }
 
