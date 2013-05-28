@@ -119,7 +119,19 @@ function graficarAtomata() {
     Graficar(automata);
 }
 
-function Graficar(automata) {
+
+
+function computarCadena () {
+	//listaDeDFA['Acepta por lo menos 2 b'].probar("ab").acepta
+	var entrada = $('#EntradaDeDefinicion').val().trim();
+    var automata = crearAutomata(entrada);
+	
+     var cadena =  document.getElementById("CadenaDeEntrada").value;
+	//if (automata.probar(cadena).acepta)
+	alert(automata.probar(cadena).acepta);	
+}
+
+function Graficar(estados, estadoInicial, estadosFinales, transiciones) {
 
     canvas.clear();
     var titulo = automata.tipo + ": " + automata.nombre;
