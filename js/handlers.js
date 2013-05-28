@@ -131,7 +131,7 @@ function computarCadena () {
 	alert(automata.probar(cadena).acepta);	
 }
 
-function Graficar(estados, estadoInicial, estadosFinales, transiciones) {
+function Graficar(automata) {
 
     canvas.clear();
     var titulo = automata.tipo + ": " + automata.nombre;
