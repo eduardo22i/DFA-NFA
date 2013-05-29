@@ -184,12 +184,90 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.interseccion = function(dfa){
+		var nombre = this.nombre + " *INTERSECCION* " + dfa.nombre;
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = "";
+		var estadosFinales = [];
+
+		for (s in this.alfabeto){
+			if (!dfa.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos DFA deben ser iguales";
+			}
+		}
+
+		for (s in dfa.alfabeto){
+			if (!this.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos DFA deben ser iguales";
+			}
+			alfabeto.push(s);
+		}
+
+
+		for (e1 in this.estados){
+			for (e2 in dfa.estados){
+				estados.push(this.estados[e1].nombre + "_" + dfa.estados[e2].nombre);
+				
+				//Si e1 es parte del conjunto de estados finales del df1, AND e2 es parte del conjunto de estados finales del dfa2, se convierte en un estado final de este nuevo dfa 
+				if (this.estadosFinales.hasOwnProperty(e1) && dfa.estadosFinales.hasOwnProperty(e2)){
+					estadosFinales.push(e1 + "_" + e2);
+				}
+
+				for (var j = 0; j < alfabeto.length; j++){
+					transiciones.push([e1 + "_" + e2, alfabeto[j], this.estados[e1].transiciones[alfabeto[j]].nombre + "_" + dfa.estados[e2].transiciones[alfabeto[j]].nombre]);
+				}		
+			}
+		}
+
+		estadoInicial = this.estadoInicial.nombre + "_" + dfa.estadoInicial.nombre;
+
+		return new DFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
 	this.concatenacion = function(dfa){
 	};
 
 	this.complemento = function(){
+		var nombre = this.nombre + " *COMPLEMENTO*";
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
+
+		for (e1 in this.estados){
+			estados.push(e1);
+		}
+
+		for (s in this.alfabeto){
+			alfabeto.push(s); 
+		}
+
+		for (e1 in this.estados){
+			for (t1 in this.estados[e1].transiciones){
+				var estadosDestino = new Array();
+
+				for (ef1 in this.estados[e1].transiciones[t1]){
+					estadosDestino.push(this.estados[e1].transiciones[t1][ef1].nombre);
+				}
+
+				transiciones.push([e1, (t1 === "null" ? null:t1), estadosDestino]);
+			}
+		}
+
+		estadoInicial = this.estadoInicial.nombre;
+
+		//hasta ahorita, todo fue copy/paste de este nfa. la unica diferencia es que los estados finales ahora no son estados finales...y los que no eran ahora si lo son
+		for (e1 in this.estados){
+			if (this.estadosFinales.hasOwnProperty(e1) === false){ //si no es estado final de esta maquina
+				estadosFinales.push(e1); //lo ponemos como estado final de la nueva maquina
+			}
+		}
+
+		return new DFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
 	this.estrella = function(){
@@ -355,6 +433,8 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		throw "El conjunto de estados finales es requerido";
 	}
 
+	console.log(this);
+
 	this.union = function(nfa){
 		var nombre = this.nombre + " *UNION* " + nfa.nombre;
 
@@ -367,19 +447,26 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		for (e1 in this.estados){
 			estados.push(e1 + "-1");
 		}
-		alert(estados);
+		//alert(estados);
 		for (e2 in nfa.estados){
 			estados.push(e2 + "-2");
 		}
 
-		alert(estados);
-		//agregar un nuevo estado inicial
 		estadoInicial = this.estadoInicial.nombre + "_" + nfa.estadoInicial.nombre;
 		estados.push(estadoInicial);
 
-		//copiar el alfabeto de cualquier automata
 		for (s in this.alfabeto){
-			alfabeto.push(s);
+			if (!nfa.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
+			}
+		}
+
+		//Se tiene que recorrer de nuevo, esta vez con los simbolos del otro DFA, porque puede ser que tengan los mismos simbolos solo que este tenga uno mas.
+		for (s in nfa.alfabeto){
+			if (!this.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
+			}
+			alfabeto.push(s); //puede ser que el codigo tire exception despues de llenar algunos elementos del arreglo, pero no importa porque se termina la ejecucion. Llenamos el arreglo aqui mismo.
 		}
 
 		//transiciones se copian asi como estan.
@@ -395,7 +482,7 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 			}
 		}
 
-		alert(transiciones);
+		//alert(transiciones);
 
 		for (e2 in nfa.estados){
 			for (t2 in nfa.estados[e2].transiciones){
@@ -409,7 +496,7 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 			}
 		}
 
-		alert(transiciones);
+		//alert(transiciones);
 
 		//crear 2 transiciones epsilon, desde el nuevo estado inicial a los estados iniciales de cada automata individual
 		transiciones.push([estadoInicial, null, [this.estadoInicial.nombre + "-1", nfa.estadoInicial.nombre + "-2"]]);
@@ -423,13 +510,13 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 			estadosFinales.push(e2 + "-2");
 		}
 
-		alert(estadoInicial);
-		alert(estadosFinales);
+		//alert(estadoInicial);
+		//alert(estadosFinales);
 
-		console.log(estados);
-		console.log(transiciones);
-		console.log(estadoInicial);
-		console.log(estadosFinales);
+		//console.log(estados);
+		//console.log(transiciones);
+		//console.log(estadoInicial);
+		//console.log(estadosFinales);
 		return new NFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
@@ -437,12 +524,161 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.concatenacion = function(nfa){
+		var nombre = this.nombre + " *CONCAT* " + nfa.nombre;
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
+
+		for (e1 in this.estados){
+			estados.push(e1 + "-1");
+			if (this.estadoInicial.nombre == e1){ //este se convierte en el estado inicial del nfa resultante
+				estadoInicial = e1 + "-1";
+			}
+		}
+		
+		for (e2 in nfa.estados){
+			estados.push(e2 + "-2");
+			if (nfa.estadosFinales.hasOwnProperty(e2)){ //estos se convierten en los estados finales del nfa resultante
+				estadosFinales.push(e2 + "-2");
+			}
+		}
+
+		for (s in this.alfabeto){
+			if (!nfa.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
+			}
+		}
+
+		//Se tiene que recorrer de nuevo, esta vez con los simbolos del otro DFA, porque puede ser que tengan los mismos simbolos solo que este tenga uno mas.
+		for (s in nfa.alfabeto){
+			if (!this.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos NFA deben ser iguales";
+			}
+			alfabeto.push(s); //puede ser que el codigo tire exception despues de llenar algunos elementos del arreglo, pero no importa porque se termina la ejecucion. Llenamos el arreglo aqui mismo.
+		}
+
+		for (e1 in this.estados){
+			for (t1 in this.estados[e1].transiciones){
+				var estadosDestino = new Array();
+
+				for (ef1 in this.estados[e1].transiciones[t1]){
+					estadosDestino.push(this.estados[e1].transiciones[t1][ef1].nombre + "-1");
+				}
+
+				//aqui se crean las transiciones desde los estados finales del nfa1 al estado inicial del nfa2
+				if (this.estadosFinales.hasOwnProperty(e1)){//si este estado es estado final del nfa1
+					transiciones.push([e1 + "-1", null, [nfa.estadoInicial.nombre + "-2"]]); //metemos una transicion epsilon desde el hacia el estado inicial del nfa2
+				}
+				//podria ser que t1 sea null, entonces lo mas correcto seria meter esa nueva transicion en el arreglo estadosDestino, pero el constructor de NFA funciona aunque las transiciones esten separadas en varias lineas
+
+				transiciones.push([e1 + "-1", (t1 === "null" ? null:t1), estadosDestino]);
+			}
+		}
+
+		for (e2 in nfa.estados){
+			for (t2 in nfa.estados[e2].transiciones){
+				var estadosDestino = new Array();
+
+				for (ef2 in nfa.estados[e2].transiciones[t2]){
+					estadosDestino.push(nfa.estados[e2].transiciones[t2][ef2].nombre + "-2");
+				}
+
+				transiciones.push([e2 + "-2", (t2 === "null" ? null:t2), estadosDestino]);
+			}
+		}
+
+		return new NFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
 	this.complemento = function(){
+		//este es cagado de risa. primero se convierte en DFA y luego se invierten los estados finales.
+		//TODAVIA FALTA CONVERTIRLO A DFA. NO FUNCIONA TODAVIA
+		var nombre = this.nombre + " *COMPLEMENTO*";
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
+
+		for (e1 in this.estados){
+			estados.push(e1);
+		}
+
+		for (s in this.alfabeto){
+			alfabeto.push(s); 
+		}
+
+		for (e1 in this.estados){
+			for (t1 in this.estados[e1].transiciones){
+				var estadosDestino = new Array();
+
+				for (ef1 in this.estados[e1].transiciones[t1]){
+					estadosDestino.push(this.estados[e1].transiciones[t1][ef1].nombre);
+				}
+
+				transiciones.push([e1, (t1 === "null" ? null:t1), estadosDestino]);
+			}
+		}
+
+		estadoInicial = this.estadoInicial.nombre;
+
+		//hasta ahorita, todo fue copy/paste de este nfa. la unica diferencia es que los estados finales ahora no son estados finales...y los que no eran ahora si lo son
+		for (e1 in this.estados){
+			if (this.estadosFinales.hasOwnProperty(e1) === false){ //si no es estado final de esta maquina
+				estadosFinales.push(e1); //lo ponemos como estado final de la nueva maquina
+			}
+		}
+
+		return new NFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
 	this.estrella = function(){
+		//se crea un nuevo estado inicial que se transiciona al viejo estado inicial con epsilon. luego, se agregan transiciones epsilon desde todos los estados finales al vijeo estado
+		var nombre = this.nombre + " *ESTRELLA*";
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
+
+		for (e1 in this.estados){
+			estados.push(e1);
+		}
+
+		estadoInicial = this.estadoInicial.nombre + "_0"; //el nuevo estado inicial
+		estados.push(estadoInicial);
+
+		for (s in this.alfabeto){ //alfabeto es igual
+			alfabeto.push(s); 
+		}
+
+		for (e1 in this.estados){ //transiciones son iguales
+			for (t1 in this.estados[e1].transiciones){
+				var estadosDestino = new Array();
+
+				for (ef1 in this.estados[e1].transiciones[t1]){
+					estadosDestino.push(this.estados[e1].transiciones[t1][ef1].nombre);
+				}
+
+				transiciones.push([e1, (t1 === "null" ? null:t1), estadosDestino]);
+			}
+		}
+
+		transiciones.push([estadoInicial, null, [this.estadoInicial.nombre]]); //transicion del nuevo q0 al viejo q0
+
+		for (e1 in this.estados){
+			if (this.estadosFinales.hasOwnProperty(e1)){
+				estadosFinales.push(e1);
+				transiciones.push([e1, null, [this.estadoInicial.nombre]]); //transiciones de los estados finales al viejo q0
+			}
+		}
+
+		return new NFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
 	this.probar = function(cadena){
@@ -460,30 +696,28 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		}
 
 		function recursar(cadena, estadoActual, estadosFinales){
-			if (cadena.length === 0){
-				if (estadosFinales.hasOwnProperty(estadoActual.nombre)){
-					return true;
-				}else{
-					return false;
-				}
+			if ((cadena.length === 0) && (estadosFinales.hasOwnProperty(estadoActual.nombre))){
+				resultado.acepta = true;
+				return true;
 			}else{
-				var siguienteSimbolo = cadena.splice(0,1)[0];
+				if (cadena.length > 0){
+					var siguienteSimbolo = cadena.splice(0,1)[0];
 
-				for (e in estadoActual.transiciones[siguienteSimbolo]){
-					resultado.transicionesTomadas.push("De '" + estadoActual.nombre + "' con '" + siguienteSimbolo + "' -> '" + estadoActual.transiciones[siguienteSimbolo][e].nombre + "'");
-					if (recursar(cadena, estadoActual.transiciones[siguienteSimbolo][e], estadosFinales) === true){
-						resultado.acepta = true;
-						return true;
-					}else{
-						resultado.transicionesTomadas.pop();
+					for (e in estadoActual.transiciones[siguienteSimbolo]){
+						resultado.transicionesTomadas.push("De '" + estadoActual.nombre + "' con '" + siguienteSimbolo + "' -> '" + estadoActual.transiciones[siguienteSimbolo][e].nombre + "'");
+						if (recursar(cadena, estadoActual.transiciones[siguienteSimbolo][e], estadosFinales) === true){
+							resultado.acepta = true;
+							return true;
+						}else{
+							resultado.transicionesTomadas.pop();
+						}
 					}
+					cadena.splice(0,0,siguienteSimbolo);
 				}
-
 				//ya probamos movernos desde el estado actual a todos los posibles estados con un simbolo del alfabeto.
 				//no se logro encontrar una solcuion, entonces retornamos ese simbolo a la cadena y ahora
 				//probamos con transiciones epsilon.
 
-				cadena.splice(0,0,siguienteSimbolo);
 				siguienteSimbolo = null;
 
 				for (e in estadoActual.transiciones[siguienteSimbolo]){
@@ -497,7 +731,7 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 				}
 
 				return false;
-			}
+			}			
 		}
 	};
 }
