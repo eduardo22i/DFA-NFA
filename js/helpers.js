@@ -11,6 +11,16 @@ function mostrarErrorDeConstruccion(mensaje){
 	$('#MensajeDeConstruccion').html(html);
 }
 
+function mostrarErrorDeAnimacion(mensaje) {
+    var html = "";
+    html += '<div class="alert alert-error">';
+    html += '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+    html += mensaje;
+    html += '</div>';
+
+    $('#MensajeDeAnimacion').html(html);
+}
+
 function mostrarExitoDeConstruccion(mensaje){
 	var html = "";
 	html += '<div class="alert alert-success">';
@@ -19,6 +29,16 @@ function mostrarExitoDeConstruccion(mensaje){
 	html += '</div>';
 	
 	$('#MensajeDeConstruccion').html(html);
+}
+
+function mostrarExitoDeAnimacion(mensaje) {
+    var html = "";
+    html += '<div class="alert alert-success">';
+    html += '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+    html += mensaje;
+    html += '</div>';
+
+    $('#MensajeDeAnimacion').html(html);
 }
 
 function esconderMensajeDeConstruccion(){

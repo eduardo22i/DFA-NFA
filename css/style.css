@@ -130,6 +130,8 @@ b {
 
 #EntradaDeDefinicion {
     width:100%;
+    word-wrap:normal;
+    overflow:auto;
 }
 
 div.row {
