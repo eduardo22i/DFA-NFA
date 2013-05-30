@@ -227,13 +227,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.concatenacion = function(dfa){
-		var nombre = this.nombre + " *CONCATENACIÓN* " + dfa.nombre;
-
-		var estados = [];
-		var alfabeto = [];
-		var transiciones = [];
-		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
-		var estadosFinales = [];
+		throw "Esta funcion todavia no esta implementada";
 	};
 
 	this.complemento = function(){
@@ -255,13 +249,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 
 		for (e1 in this.estados){
 			for (t1 in this.estados[e1].transiciones){
-				var estadosDestino = new Array();
-
-				for (ef1 in this.estados[e1].transiciones[t1]){
-					estadosDestino.push(this.estados[e1].transiciones[t1][ef1].nombre);
-				}
-
-				transiciones.push([e1, (t1 === "null" ? null:t1), estadosDestino]);
+				transiciones.push([e1, t1, this.estados[e1].transiciones[t1].nombre]);
 			}
 		}
 
@@ -278,13 +266,7 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.estrella = function(){
-		var nombre = this.nombre + " *ESTRELLA*";
-
-		var estados = [];
-		var alfabeto = [];
-		var transiciones = [];
-		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
-		var estadosFinales = [];
+		throw "Esta funcion todavia no esta implementada";
 	};
 
 	this.probar = function(cadena){
@@ -535,6 +517,7 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.interseccion = function(nfa){
+		throw "Esta funcion todavia no esta implementada";
 	};
 
 	this.concatenacion = function(nfa){
@@ -695,6 +678,10 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 		return new NFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
 	};
 
+	this.convertirEnDFA = function(){
+		throw "Esta funcion todavia no esta implementada";
+	};
+
 	this.probar = function(cadena){
 		//funcion recursiva que pureba todas los posibles caminos hasta encontrar uno que acepta la cadena
 		if (cadena instanceof Array){
@@ -747,6 +734,49 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 				return false;
 			}			
 		}
+	};
+
+	this.generarDefinicion = function(){
+		var definicion = "";
+
+		var tipo = "NFA";
+		var nombre = this.nombre;
+		var estados = [];
+		var simbolos = [];
+		var transiciones = [];
+		var estadoInicial = this.estadoInicial.nombre;
+		var estadosFinales = [];
+
+		for (e in this.estados){
+			estados.push(e);
+
+			for (t in this.estados[e].transiciones){
+				var estadosDestino = [];
+				for (ed in this.estados[e].transiciones[t]){
+					estadosDestino.push(this.estados[e].transiciones[t][ed].nombre);
+				}
+
+				transiciones.push("(" + e + "," + (t === "null" ? "#":t) + ",(" + estadosDestino.join(",") + "))");
+			}
+		}
+
+		for (s in this.alfabeto){
+			simbolos.push(s);
+		}
+
+		for (e in this.estadosFinales){
+			estadosFinales.push(e);
+		}
+
+		var definicion = tipo + "\n";
+		definicion += nombre + "\n";
+		definicion += estados.join(",") + "\n";
+		definicion += simbolos.join(",") + "\n";
+		definicion += transiciones.join(",") + "\n";
+		definicion += estadoInicial + "\n";
+		definicion += estadosFinales.join(",");
+
+		return definicion;
 	};
 }
 

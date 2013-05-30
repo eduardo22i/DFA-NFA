@@ -48,12 +48,12 @@ function esconderMensajeDeConstruccion(){
 function validarSintaxis(partes){
 	var tipoRegex = /^(DFA|NFA)$/;
 	var nombreRegex = /^[a-zA-Z0-9 ,'\(\)\*\+]+$/;
-	var estadosRegex = /^[a-zA-Z0-9_]+(,[a-zA-Z0-9_]+)*$/;
+	var estadosRegex = /^[a-zA-Z0-9\-_]+(,[a-zA-Z0-9\-_]+)*$/;
 	var alfabetoRegex = /^[a-zA-Z0-9]+(,[a-zA-Z0-9]+)*$/;
-	var transicionesDfaRegex = /^\([a-zA-Z0-9_]+,[a-zA-Z0-9]+,[a-zA-Z0-9_]+\)(,\([a-zA-Z0-9_]+,[a-zA-Z0-9]+,[a-zA-Z0-9_]+\))*$/;
-	var transicionesNfaRegex = /^\([a-zA-Z0-9_]+,([a-zA-Z0-9]+|#),\([a-zA-Z0-9_]+(,[a-zA-Z0-9_]+)*\)\)(,\([a-zA-Z0-9_]+,([a-zA-Z0-9]+|#),\([a-zA-Z0-9_]+(,[a-zA-Z0-9_]+)*\)\))*$/;
-	var estadoInicialRegex = /^[a-zA-Z0-9_]+$/
-	var estadosFinalesRegex = /^[a-zA-Z0-9_]+(,[a-zA-Z0-9_]+)*$/;
+	var transicionesDfaRegex = /^\([a-zA-Z0-9\-_]+,[a-zA-Z0-9]+,[a-zA-Z0-9\-_]+\)(,\([a-zA-Z0-9\-_]+,[a-zA-Z0-9]+,[a-zA-Z0-9\-_]+\))*$/;
+	var transicionesNfaRegex = /^\([a-zA-Z0-9\-_]+,([a-zA-Z0-9]+|#),\([a-zA-Z0-9\-_]+(,[a-zA-Z0-9\-_]+)*\)\)(,\([a-zA-Z0-9\-_]+,([a-zA-Z0-9]+|#),\([a-zA-Z0-9\-_]+(,[a-zA-Z0-9\-_]+)*\)\))*$/;
+	var estadoInicialRegex = /^[a-zA-Z0-9\-_]+$/
+	var estadosFinalesRegex = /^[a-zA-Z0-9\-_]+(,[a-zA-Z0-9\-_]+)*$/;
 
 	if (partes.length === 7){
 		if (tipoRegex.test(partes[0])){
@@ -95,7 +95,7 @@ function validarSintaxis(partes){
 						throw "Error de sintaxis en la linea 4: El formato del alfabeto debe ser una lista CSV de simbolos que tengan solamente caracteres alfanumericos";
 					}
 				}else{
-					throw "Error de sintaxis en la linea 3: El formato de los estados debe ser una lista CSV de estados que tengan solamente caracteres alfanumericos y guiones bajos";
+					throw "Error de sintaxis en la linea 3: El formato de los estados debe ser una lista CSV de estados que tengan solamente caracteres alfanumericos, guiones y guiones bajos";
 				}
 			}else{
 				throw "Error de sintaxis en la linea 2: El nombre del automata solo debe contener caracteres alfanumericos, espacios, comas y: + * ( )";
@@ -177,7 +177,7 @@ function actualizarMenuDeDFA(){
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li onclick="unirDosDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="unirDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
 
 			html += '</ul>';
@@ -187,9 +187,9 @@ function actualizarMenuDeDFA(){
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li onclick="interseccionDosDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="intersectarDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
-			
+
 			html += '</ul>';
 			html += '</li>';
 			html += '<li class="dropdown-submenu">';
@@ -197,14 +197,14 @@ function actualizarMenuDeDFA(){
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li onclick="concatenarDosDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="concatenarDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
 		    
 		    html += '</ul>';
 			html += '</li>';
 		                
-			html += '<li onclick="complementoDFA(\'' + dfa+ '\');" ><a href="#">Complemento</a></li>';
-			html += '<li onclick="estrellaDFA(\'' + dfa+ '\');" ><a href="#">Estrella</a></li>';
+			html += '<li onclick="complementarDFA(\'' + dfa + '\');"><a href="#">Complemento</a></li>';
+			html += '<li onclick="estrellarDFA(\'' + dfa + '\');"><a href="#">Estrella</a></li>';
 			html += '</ul>';
 			html += '</li>';
 		}
@@ -231,15 +231,15 @@ function actualizarMenuDeNFA(){
 			html += '<a data-toggle="dropdown" class="dropdown-toggle" href="#">' + listaDeNFA[nfa].nombre + '<b class="caret"></b></a>';
 			html += '<ul class="dropdown-menu">';
 			html += '<li class="nav-header">Acciones</li>';
-			html += '<li><a href="#">Ver</a></li>';
-			html += '<li><a href="#">Eliminar</a></li>';
+			html += '<li onclick="verNFA(\'' + nfa + '\');"><a href="#">Ver</a></li>';
+			html += '<li onclick="eliminarNFA(\'' + nfa + '\');"><a href="#">Eliminar</a></li>';
 			html += '<li class="nav-header">Operaciones</li>';
 			html += '<li class="dropdown-submenu">';
 			html += '<a href="#">Union</a>';
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li ><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="unirNFA(\'' + nfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
 
 			html += '</ul>';
@@ -249,7 +249,7 @@ function actualizarMenuDeNFA(){
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="intersectarNFA(\'' + nfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
 
 			html += '</ul>';
@@ -259,14 +259,14 @@ function actualizarMenuDeNFA(){
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="concatenarNFA(\'' + nfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
 		    
 		    html += '</ul>';
 			html += '</li>';
 		                
-			html += '<li><a href="#">Complemento</a></li>';
-			html += '<li><a href="#">Estrella</a></li>';
+			html += '<li onclick="complementarNFA(\'' + nfa + '\');"><a href="#">Complemento</a></li>';
+			html += '<li onclick="estrellarNFA(\'' + nfa + '\');"><a href="#">Estrella</a></li>';
 			html += '</ul>';
 			html += '</li>';
 		}

@@ -2,18 +2,18 @@
 
 $(document).ready(function () {
     //crear dos DFA y dos NFA que sirvan de ejemplos
-    var nombre1 = "Acepta 3 a";
+    var nombre1 = "Acepta por lo menos 3 a";
     var estados1 = ["q0", "q1", "q2", "q3"];
     var simbolos1 = ["a", "b"];
     var transiciones1 = [
-		["q0", "a", "q1"],
-		["q0", "b", "q0"],
-		["q1", "a", "q2"],
-		["q1", "b", "q1"],
-		["q2", "a", "q3"],
-		["q2", "b", "q2"],
-		["q3", "a", "q3"],
-		["q3", "b", "q3"]
+        ["q0", "a", "q1"],
+        ["q0", "b", "q0"],
+        ["q1", "a", "q2"],
+        ["q1", "b", "q1"],
+        ["q2", "a", "q3"],
+        ["q2", "b", "q2"],
+        ["q3", "a", "q3"],
+        ["q3", "b", "q3"]
     ];
     var estadoInicial1 = "q0";
     var estadosFinales1 = ["q3"];
@@ -24,12 +24,12 @@ $(document).ready(function () {
     var estados2 = ["p0", "p1", "p2"];
     var simbolos2 = ["a", "b"];
     var transiciones2 = [
-		["p0", "a", "p0"],
-		["p0", "b", "p1"],
-		["p1", "a", "p1"],
-		["p1", "b", "p2"],
-		["p2", "a", "p2"],
-		["p2", "b", "p2"]
+        ["p0", "a", "p0"],
+        ["p0", "b", "p1"],
+        ["p1", "a", "p1"],
+        ["p1", "b", "p2"],
+        ["p2", "a", "p2"],
+        ["p2", "b", "p2"]
     ];
     var estadoInicial2 = "p0";
     var estadosFinales2 = ["p2"];
@@ -39,11 +39,11 @@ $(document).ready(function () {
     var estados3 = ["q0", "q1", "q2"];
     var simbolos3 = ["a", "b", "c"];
     var transiciones3 = [
-		["q0", "a", ["q0"]],
-		["q0", null, ["q1"]],
-		["q1", "b", ["q1"]],
-		["q1", null, ["q2"]],
-		["q2", "c", ["q2"]]
+        ["q0", "a", ["q0"]],
+        ["q0", null, ["q1"]],
+        ["q1", "b", ["q1"]],
+        ["q1", null, ["q2"]],
+        ["q2", "c", ["q2"]]
     ];
     var estadoInicial3 = "q0";
     var estadosFinales3 = ["q2"];
@@ -54,13 +54,13 @@ $(document).ready(function () {
     var estados4 = ["q0", "p1", "p2", "p3", "p4", "p5", "p6"];
     var simbolos4 = ["a", "b", "c"];
     var transiciones4 = [
-		["q0", "a", ["q0", "p3"]],
-		["q0", "b", ["q0"]],
-		["q0", "b", ["p1"]],
-		["q0", "c", ["q0", "p5"]],
-		["p1", "c", ["p2"]],
-		["p3", "b", ["p4"]],
-		["p5", "a", ["p6"]]
+        ["q0", "a", ["q0", "p3"]],
+        ["q0", "b", ["q0"]],
+        ["q0", "b", ["p1"]],
+        ["q0", "c", ["q0", "p5"]],
+        ["p1", "c", ["p2"]],
+        ["p3", "b", ["p4"]],
+        ["p5", "a", ["p6"]]
     ];
     var estadoInicial4 = "q0";
     var estadosFinales4 = ["p2", "p4", "p6"];
@@ -71,12 +71,12 @@ $(document).ready(function () {
     var estados5 = ["q0", "q1", "q2", "q3"];
     var simbolos5 = ["0", "1"];
     var transiciones5 = [
-		["q0", "0", "q1"],
-		["q0", "1", "q0"],
-		["q1", "0", "q2"],
-		["q1", "1", "q0"],
-		["q2", "0", "q2"],
-		["q2", "1", "q3"],
+        ["q0", "0", "q1"],
+        ["q0", "1", "q0"],
+        ["q1", "0", "q2"],
+        ["q1", "1", "q0"],
+        ["q2", "0", "q2"],
+        ["q2", "1", "q3"],
         ["q3", "0", "q3"],
         ["q3", "1", "q3"]
     ];
@@ -98,7 +98,7 @@ $(document).ready(function () {
         heightCanvas = $("#canvas").height() > 500 ? 500 : $("#canvas").height();
 
         canvas = Raphael(document.getElementById("canvas"), widthCanvas, heightCanvas);
-        graficarAtomata();
+        graficarAutomata();
     });
 });
 
@@ -129,7 +129,7 @@ function guardarAutomata() {
     }
 }
 
-function graficarAtomata() {
+function graficarAutomata() {
     $('#MensajeDeConstruccion').html("");
 
     try {
@@ -390,43 +390,124 @@ function limpiarDefinicion() {
     esconderMensajeDeConstruccion();
 }
 
-function unirDosDFA(dfa1, dfa2) {
-    listaDeDFA[dfa1 + " *UNION* " + dfa2] = listaDeDFA[dfa1].union(listaDeDFA[dfa2]);
-    actualizarMenuDeDFA();
-}
-
-
-function interseccionDosDFA(dfa1, dfa2) {
-    listaDeDFA[dfa1 + " *INTERSECCIÓN* " + dfa2] = listaDeDFA[dfa1].interseccion(listaDeDFA[dfa2]);
-    actualizarMenuDeDFA();
-}
-
-
-function concatenarDosDFA(dfa1, dfa2) {
-    listaDeDFA[dfa1 + " *CONCATENAR* " + dfa2] = listaDeDFA[dfa1].concatenacion(listaDeDFA[dfa2]);
-    actualizarMenuDeDFA();
-}
-
-
-function complementoDFA(dfa1) {
-    listaDeDFA[dfa1 + " *COMPLEMENTO* "] = listaDeDFA[dfa1].complemento();
-    actualizarMenuDeDFA();
-}
-
-
-function estrellaDFA(dfa1) {
-    listaDeDFA[dfa1 + " *ESTRELLA* "] = listaDeDFA[dfa1].estrella();
-    //actualizarMenuDeDFA();
-}
-
-
 function verDFA(dfa) {
     limpiarDefinicion();
     $('#EntradaDeDefinicion').val(listaDeDFA[dfa].generarDefinicion());
-    graficarAtomata();
+    graficarAutomata();
 }
 
 function eliminarDFA(dfa) {
     delete (listaDeDFA[dfa]);
     actualizarMenuDeDFA();
+}
+
+function unirDFA(dfa1, dfa2) {
+    try{
+        var nuevoDFA = listaDeDFA[dfa1].union(listaDeDFA[dfa2]);
+        listaDeDFA[nuevoDFA.nombre] = nuevoDFA;
+        actualizarMenuDeDFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function intersectarDFA(dfa1, dfa2) {
+    try{
+        var nuevoDFA = listaDeDFA[dfa1].interseccion(listaDeDFA[dfa2]);
+        listaDeDFA[nuevoDFA.nombre] = nuevoDFA;
+        actualizarMenuDeDFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function concatenarDFA(dfa1, dfa2){
+    try{
+        var nuevoDFA = listaDeDFA[dfa1].concatenacion(listaDeDFA[dfa2]);
+        listaDeDFA[nuevoDFA.nombre] = nuevoDFA;
+        actualizarMenuDeDFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function complementarDFA(dfa){
+    try{
+        var nuevoDFA = listaDeDFA[dfa].complemento();
+        listaDeDFA[nuevoDFA.nombre] = nuevoDFA;
+        actualizarMenuDeDFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function estrellarDFA(dfa){
+    try{
+        var nuevoDFA = listaDeDFA[dfa].estrella();
+        listaDeDFA[nuevoDFA.nombre] = nuevoDFA;
+        actualizarMenuDeDFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function verNFA(nfa){
+    limpiarDefinicion();
+    $('#EntradaDeDefinicion').val(listaDeNFA[nfa].generarDefinicion());
+    graficarAutomata();
+}
+
+function eliminarNFA(nfa){
+    delete (listaDeNFA[nfa]);
+    actualizarMenuDeNFA();
+}
+
+function unirNFA(nfa1, nfa2){
+    try{
+        var nuevoNFA = listaDeNFA[nfa1].union(listaDeNFA[nfa2]);
+        listaDeNFA[nuevoNFA.nombre] = nuevoNFA;
+        actualizarMenuDeNFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function intersectarNFA(nfa){
+    try{
+        var nuevoNFA = listaDeNFA[nfa1].interseccion(listaDeNFA[nfa2]);
+        listaDeNFA[nuevoNFA.nombre] = nuevoNFA;
+        actualizarMenuDeNFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function concatenarNFA(nfa1, nfa2){
+    try{
+        var nuevoNFA = listaDeNFA[nfa1].concatenacion(listaDeNFA[nfa2]);
+        listaDeNFA[nuevoNFA.nombre] = nuevoNFA;
+        actualizarMenuDeNFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function complementarNFA(nfa){
+    try{
+        var nuevoNFA = listaDeNFA[nfa1].complemento(listaDeNFA[nfa2]);
+        listaDeNFA[nuevoNFA.nombre] = nuevoNFA;
+        actualizarMenuDeNFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
+}
+
+function estrellarNFA(nfa){
+    try{
+        var nuevoNFA = listaDeNFA[nfa].estrella();
+        listaDeNFA[nuevoNFA.nombre] = nuevoNFA;
+        actualizarMenuDeNFA();
+    }catch(e){
+        mostrarErrorDeConstruccion(e.toString());
+    }
 }
