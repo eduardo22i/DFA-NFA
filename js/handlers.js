@@ -395,6 +395,31 @@ function unirDosDFA(dfa1, dfa2) {
     actualizarMenuDeDFA();
 }
 
+
+function interseccionDosDFA(dfa1, dfa2) {
+    listaDeDFA[dfa1 + " *INTERSECCIÓN* " + dfa2] = listaDeDFA[dfa1].interseccion(listaDeDFA[dfa2]);
+    actualizarMenuDeDFA();
+}
+
+
+function concatenarDosDFA(dfa1, dfa2) {
+    listaDeDFA[dfa1 + " *CONCATENAR* " + dfa2] = listaDeDFA[dfa1].concatenacion(listaDeDFA[dfa2]);
+    actualizarMenuDeDFA();
+}
+
+
+function complementoDFA(dfa1) {
+    listaDeDFA[dfa1 + " *COMPLEMENTO* "] = listaDeDFA[dfa1].complemento();
+    actualizarMenuDeDFA();
+}
+
+
+function estrellaDFA(dfa1) {
+    listaDeDFA[dfa1 + " *ESTRELLA* "] = listaDeDFA[dfa1].estrella();
+    //actualizarMenuDeDFA();
+}
+
+
 function verDFA(dfa) {
     limpiarDefinicion();
     $('#EntradaDeDefinicion').val(listaDeDFA[dfa].generarDefinicion());

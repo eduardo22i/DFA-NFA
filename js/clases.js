@@ -227,6 +227,13 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.concatenacion = function(dfa){
+		var nombre = this.nombre + " *CONCATENACIÓN* " + dfa.nombre;
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
 	};
 
 	this.complemento = function(){
@@ -271,6 +278,13 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.estrella = function(){
+		var nombre = this.nombre + " *ESTRELLA*";
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
 	};
 
 	this.probar = function(cadena){

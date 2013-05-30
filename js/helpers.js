@@ -187,9 +187,9 @@ function actualizarMenuDeDFA(){
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="interseccionDosDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
-
+			
 			html += '</ul>';
 			html += '</li>';
 			html += '<li class="dropdown-submenu">';
@@ -197,14 +197,14 @@ function actualizarMenuDeDFA(){
 			html += '<ul class="dropdown-menu">';
 			
 			for (var i = 0; i < otros.length; i++){
-				html += '<li><a href="#">' + otros[i].nombre + '</a></li>';
+				html += '<li onclick="concatenarDosDFA(\'' + dfa + '\',\'' + otros[i].nombre + '\');"><a href="#">' + otros[i].nombre + '</a></li>';
 			}
 		    
 		    html += '</ul>';
 			html += '</li>';
 		                
-			html += '<li><a href="#">Complemento</a></li>';
-			html += '<li><a href="#">Estrella</a></li>';
+			html += '<li onclick="complementoDFA(\'' + dfa+ '\');" ><a href="#">Complemento</a></li>';
+			html += '<li onclick="estrellaDFA(\'' + dfa+ '\');" ><a href="#">Estrella</a></li>';
 			html += '</ul>';
 			html += '</li>';
 		}
