@@ -5,7 +5,11 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	this.alfabeto = {};
 	this.estadoInicial = {};
 	this.estadosFinales = {};
-
+	
+	if (this.alfabeto[this.alfabeto.length] == "#") {
+		this.alfabeto.pop()	
+	}
+	
 	if (estados && estados.length > 0){
 		estados = estados.sort();
 		var anterior = "";
@@ -227,7 +231,91 @@ function DFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	};
 
 	this.concatenacion = function(dfa){
-		throw "Esta funcion todavia no esta implementada";
+		
+		var nombre = this.nombre + " *CONCATENACIoN* " + dfa.nombre;
+
+		var estados = [];
+		var alfabeto = [];
+		var transiciones = [];
+		var estadoInicial = ""; //todos son arreglos menos este, ya que solo puede haber un estado inicial
+		var estadosFinales = [];
+
+		//Para obtener los estados de la maquina grande, los estados de las dos maquinas pequenas se deben combinar de todas las posibles maneras.
+		/*for (e1 in this.estados){ //para cada estado en esta maquina
+			for (e2 in dfa.estados){ //para cada estado en la maquina que se me envio
+				estados.push(this.estados[e1].nombre + "_" + dfa.estados[e2].nombre); 
+			}
+		}*/
+
+
+		//Estoy asumiendo que el alfabeto es el mismo para las dos maquinas pequenas. Si no lo es, levantar una exception
+		for (s in this.alfabeto){
+			if (!dfa.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos DFA deben ser iguales";
+			}
+		}
+
+		//Se tiene que recorrer de nuevo, esta vez con los simbolos del otro DFA, porque puede ser que tengan los mismos simbolos solo que este tenga uno mas.
+		for (s in dfa.alfabeto){
+			if (!this.alfabeto.hasOwnProperty(s)){
+				throw "El alfabeto de entrada de ambos DFA deben ser iguales";
+			}
+			alfabeto.push(s); //puede ser que el codigo tire exception despues de llenar algunos elementos del arreglo, pero no importa porque se termina la ejecucion. Llenamos el arreglo aqui mismo.
+		}
+
+		alfabeto.push("#");
+		for (e1 in this.estados){ //para cada estado en esta maquina
+			estados.push(this.estados[e1].nombre);
+			for (var j = 0; j < alfabeto.length-1; j++){
+			transiciones.push([e1 , alfabeto[j], [ this.estados[e1].transiciones[alfabeto[j]].nombre ]]);
+			}
+		}
+		
+		for ( e1 in this.estadosFinales) {
+			//transiciones.pop();
+			transiciones.push([e1 ,"#",[  dfa.estadoInicial.nombre ]]);
+
+		}
+			for (e2 in dfa.estados){ //para cada estado en la maquina que se me envio
+				//metemos en el arreglo la combinacion de sus nombres, separados por un guion bajo
+				estados.push(dfa.estados[e2].nombre);
+				//Si e1 es parte del conjunto de estados finales del df1, OORRRR e2 es parte del conjunto de estados finales del dfa2, se convierte en un estado final de este nuevo dfa 
+				if ( dfa.estadosFinales.hasOwnProperty(e2)){
+					estadosFinales.push(e2);
+				}
+
+				for (var j = 0; j < alfabeto.length-1; j++){
+					//transiciones es un arreglo de arreglos: cada elemento es un arreglo de 3 elementos, el primero es el estado actual, despues el simbolo de entrada, y por ultimo el estado destino
+					//entonces metemos esos tres valores de un solo al arreglo:
+					transiciones.push([e2, alfabeto[j], [dfa.estados[e2].transiciones[alfabeto[j]].nombre]]);
+					//Todo el argumento de push() va dentro de llaves cuadradas [], porque eso significa que es un arreglo.
+					//el objeto "transiciones" de cada estado es un "arreglo associativo", que cuando se le envia de parametro un simbolo (en este caso, el j-esimo simbolo del alfabeto), retorna un objeto
+					//que es el estado al que se deberia de ir la maquina. por eso esta el ".nombre", porque ocupamos el nombre de ese estado, y lo que se retorna es un objeto entero.
+				}		
+			}
+		
+
+		
+
+
+		//El estado inicial de la maquina grande debe de ser el estado que resulto de la combinacion de los estados iniciales de las 2 maquinas pequenas
+		estadoInicial = this.estadoInicial.nombre ;
+
+
+
+		//Los estados finales son todos los estados que tienen un estado final de CUALQUIERA de las dos maquinas pequenas.
+		//en la interseccion, solamente los estados que tengan un estado final de CADA maquina serian validos.
+		//Entonces, recorremos los estados que tenemos hasta ahorita:
+		
+		//alfabeto.pop()
+		//una vez llenos los componentes del dfa, solo llamamos al constructor y retornamos el objeto resultante:
+		nNFA =  new NFA(nombre, estados, alfabeto, transiciones, estadoInicial, estadosFinales);
+				//verNFA(nNFA); 
+		//guardarAutomata();
+		
+		return nNFA;
+		
+		//throw "Esta funcion todavia no esta implementada";
 	};
 
 	this.complemento = function(){
@@ -343,7 +431,8 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	this.alfabeto = {};
 	this.estadoInicial = {};
 	this.estadosFinales = {};
-
+	
+	
 	if (estados && estados.length > 0){
 		estados = estados.sort();
 		var anterior = "";
@@ -428,6 +517,7 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 	}else{
 		throw "El conjunto de estados finales es requerido";
 	}
+
 
 	console.log(this);
 
@@ -759,9 +849,11 @@ function NFA(nombre, estados, simbolos, transiciones, estadoInicial, estadosFina
 				transiciones.push("(" + e + "," + (t === "null" ? "#":t) + ",(" + estadosDestino.join(",") + "))");
 			}
 		}
-
+		
 		for (s in this.alfabeto){
+			if (s != "#") {
 			simbolos.push(s);
+			}
 		}
 
 		for (e in this.estadosFinales){
